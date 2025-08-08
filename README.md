@@ -41,7 +41,7 @@ Diese Webanwendung erlaubt die umfassende Analyse von Textdokumenten (z. B. Ep
 
 ```bash
 # Repository klonen
-git clone https://github.com/dein-nutzername/wortanalyse-app.git
+git clone https://github.com/dasBeny/Wortanalyse-Web-App
 cd wortanalyse-app
 
 # Abhängigkeiten installieren
