@@ -112,11 +112,13 @@ if texts:
     col2.metric("️🔤 Wörter insgesamt", f"{sum(global_word_counter.values()):,}".replace(",", "."))
     col3.metric("🔤 Verschiedene Wörter insgesamt", f"{len(global_word_counter):,}".replace(",", "."))
 
-    # ---- Kombinierte Phrasen-/Wortsuche mit Top-Episoden und Wortverteilung ----
+    # ---- Kombinierte Phrasen-/Wortsuche mit korrekter Top-10-Sortierung ----
     st.subheader("🔍 Phrasen- und Wortsuche")
 
-    phrase_input = st.text_area("Gib eine oder mehrere Begriffe oder Wortgruppen ein (durch Kommas getrennt)",
-                                value="cent, münze, eimer")
+    phrase_input = st.text_area(
+        "Gib eine oder mehrere Begriffe oder Wortgruppen ein (durch Kommas getrennt)",
+        value="cent, münze, eimer"
+    )
 
     if phrase_input:
         phrases = [p.strip().lower() for p in phrase_input.split(",") if p.strip()]
@@ -134,6 +136,16 @@ if texts:
 
         df_phrases = pd.DataFrame(data)
 
+        # 🥇 Top 10 Episoden mit höchster Gesamthäufigkeit (gestapelt)
+        st.markdown("### 🥇 Top 10 Episoden mit häufigster Verwendung")
+
+        # Summiere alle Phrasen pro Episode
+        episode_sums = (
+            df_phrases.groupby("Episode")["Anzahl"]
+            .sum()
+            .sort_values(ascending=False)
+        )
+
         # 🧮 Übersicht: wie oft jedes Wort insgesamt vorkam
         st.markdown("### 🧮 Gesamtanzahl pro Begriff")
         sum_table = (
@@ -144,25 +156,18 @@ if texts:
         )
         st.dataframe(sum_table, use_container_width=True)
 
-        # 🥇 Top 10 Episoden mit höchster Gesamthäufigkeit (gestapelt)
-        st.markdown("### 🥇 Top 10 Episoden mit häufigster Verwendung")
 
-        # Top-10-Episoden nach Summe ALLER Phrasen
-        episode_sums = (
-            df_phrases.groupby("Episode")["Anzahl"]
-            .sum()
-            .sort_values(ascending=False)
-            .head(10)
-        )
-        top_episodes = episode_sums.index.tolist()
 
-        df_top = df_phrases[df_phrases["Episode"].isin(top_episodes)]
+        top_episodes = episode_sums.head(10).index.tolist()
 
-        # 🧽 Sortierung für horizontales Bar Chart
-        df_top["EpisodeLabel"] = df_top["Episode"].map(lambda x: f"Episode {x}")
+        # Daten filtern
+        df_top = df_phrases[df_phrases["Episode"].isin(top_episodes)].copy()
+
+        # Episode-Label erstellen und korrekt sortieren
+        df_top["EpisodeLabel"] = df_top["Episode"].apply(lambda x: f"Episode {x}")
         df_top["EpisodeLabel"] = pd.Categorical(
             df_top["EpisodeLabel"],
-            categories=[f"Episode {e}" for e in episode_sums.index],
+            categories=[f"Episode {i}" for i in episode_sums.head(10).index],
             ordered=True
         )
 
@@ -173,7 +178,7 @@ if texts:
             color="Phrase",
             orientation="h",
             title="🥇 Top 10 Episoden mit häufigster Verwendung ausgewählter Begriffe",
-            labels={"Anzahl": "Anzahl", "EpisodeLabel": "Episode (Top 10 nach Gesamthäufigkeit)"}
+            labels={"Anzahl": "Anzahl", "EpisodeLabel": "Episode"},
         )
         st.plotly_chart(fig_top_words, use_container_width=True)
 
