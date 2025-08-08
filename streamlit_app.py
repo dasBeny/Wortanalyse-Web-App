@@ -7,6 +7,7 @@ from pydrive2.drive import GoogleDrive
 import tempfile
 import json
 import os
+from google.oauth2 import service_account
 import plotly.express as px
 
 # ----- Konfiguration -----
