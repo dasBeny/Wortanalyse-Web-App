@@ -117,7 +117,7 @@ if texts:
 
     phrase_input = st.text_area(
         "Gib eine oder mehrere Begriffe oder Wortgruppen ein (durch Kommas getrennt)",
-        value="cent, münze, eimer"
+        value="Justus, Peter, Bob"
     )
 
 
@@ -147,15 +147,7 @@ if texts:
             .sort_values(ascending=False)
         )
 
-        # 🧮 Übersicht: wie oft jedes Wort insgesamt vorkam
-        st.markdown("### 🧮 Gesamtanzahl pro Begriff")
-        sum_table = (
-            df_phrases.groupby("Phrase")["Anzahl"]
-            .sum()
-            .reset_index()
-            .sort_values("Anzahl", ascending=False)
-        )
-        st.dataframe(sum_table, use_container_width=True)
+
 
         # 📈 Liniendiagramm: Gesamthäufigkeit pro Episode
         df_sum_per_episode = (
