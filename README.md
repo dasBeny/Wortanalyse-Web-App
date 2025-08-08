@@ -1,19 +1,104 @@
-# 🎈 Blank app template
+# 📚 Wortanalyse Web-App mit Streamlit
 
-A simple Streamlit app template for you to modify!
+Diese Webanwendung erlaubt die umfassende Analyse von Textdokumenten (z. B. Episoden, Bücher oder Kapitel) in Bezug auf:
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://blank-app-template.streamlit.app/)
+- Wortanzahl pro Datei
+- Entwicklung neuer Wörter über Dateien hinweg
+- Suche nach beliebigen Wörtern oder Wortgruppen
+- Visualisierung der Häufigkeit als interaktive Diagramme
+- Optional: Filterung von Stoppwörtern mittels externer Liste
 
-### How to run it on your own machine
+---
 
-1. Install the requirements
+## 🚀 Features
 
-   ```
-   $ pip install -r requirements.txt
-   ```
+### 🔍 Interaktive Analyse
 
-2. Run the app
+- **Häufigkeitsanalyse** von Begriffen über mehrere Episoden hinweg
+- **Liniendiagramme** für Wortverläufe und Phrasen
+- **Top-20-Wörter** als Balkendiagramm (optional ohne Stoppwörter)
 
-   ```
-   $ streamlit run streamlit_app.py
-   ```
+### 📦 Eingabedaten
+
+- Textdateien im Ordner `texte/`
+- Jede Datei entspricht einer Episode (z. B. `001.txt`, `002.txt`, ...)
+- Optional: eigene Stoppwortliste in `stoppworte/stopwords.txt`
+
+### 📤 Ausgabe
+
+- CSV-Download der Wortstatistiken pro Episode
+
+---
+
+## 🛠️ Lokale Installation
+
+### Voraussetzungen
+
+- Python 3.8+
+- Empfohlenes virtuelles Environment
+
+### Installation
+
+```bash
+# Repository klonen
+git clone https://github.com/dein-nutzername/wortanalyse-app.git
+cd wortanalyse-app
+
+# Abhängigkeiten installieren
+pip install -r requirements.txt
+```
+
+### Ordnerstruktur vorbereiten
+
+```bash
+mkdir texte
+mkdir stoppworte
+# Beispiel-Stoppwortliste erstellen
+echo -e "und\nder\ndie\nes" > stoppworte/stopwords.txt
+```
+
+### App starten
+
+```bash
+streamlit run streamlit_app.py
+```
+
+Die App öffnet sich automatisch im Browser unter `http://localhost:8501`
+
+---
+
+## 📁 Projektstruktur
+
+```
+wortanalyse-app/
+├── streamlit_app.py               # Hauptanwendung
+├── texte/                         # Eingabetexte (eine Datei pro Episode)
+├── stoppworte/stopwords.txt      # Benutzerdefinierte Stoppwortliste
+├── requirements.txt              # Python-Abhängigkeiten
+└── README.md                     # Diese Datei
+```
+
+---
+
+## ✅ To-Do / Erweiterungsideen
+
+- Filterbare Visualisierungen (z. B. nach Worttyp)
+- Wortstammerkennung / Lemmatisierung
+- Sprachumschaltung (Deutsch ↔ Englisch)
+- Option zur Auswahl einzelner Episoden
+
+---
+
+## 📄 Lizenz
+
+MIT License – frei verwendbar mit Namensnennung.
+
+---
+
+## ✨ Demo Screenshot
+
+
+
+---
+
+Viel Spaß bei der Textanalyse! 📖
