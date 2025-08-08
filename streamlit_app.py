@@ -142,6 +142,44 @@ if texts:
                               labels={"Anzahl": "Anzahl", "Episode": "Episode"})
         st.plotly_chart(fig_phrases, use_container_width=True)
 
+    # ---- Häufigste Wörter in Episoden anzeigen ----
+    st.subheader("🥇 Top 10 Episoden mit häufigster Verwendung ausgewählter Wörter")
+
+    # Eingabe ausgewählter Wörter
+    top_words_input = st.text_input("Gib bis zu 5 Wörter ein, die analysiert werden sollen (durch Kommas getrennt)",
+                                    value="cent, münze, eimer")
+
+    selected_words = [w.strip().lower() for w in top_words_input.split(",") if w.strip()][:5]
+
+    if selected_words:
+        top_data = []
+
+        for i, (file_name, cleaned) in enumerate(cleaned_texts.items(), start=1):
+            word_counts = {word: cleaned.split().count(word) for word in selected_words}
+            for word, count in word_counts.items():
+                top_data.append({
+                    "Episode": f"Episode {i}",
+                    "Wort": word,
+                    "Anzahl": count
+                })
+
+        df_top = pd.DataFrame(top_data)
+        top_episodes = (
+            df_top.groupby("Episode")["Anzahl"].sum()
+            .sort_values(ascending=False)
+            .head(10)
+            .index
+        )
+        df_top_filtered = df_top[df_top["Episode"].isin(top_episodes)]
+
+        fig_top_words = px.bar(df_top_filtered,
+                               x="Anzahl", y="Episode", color="Wort", orientation="h",
+                               title="🥇 Top 10 Episoden mit häufigster Verwendung ausgewählter Wörter",
+                               labels={"Anzahl": "Anzahl", "Episode": "Episode (nur Top 10)"}
+                               )
+
+        st.plotly_chart(fig_top_words, use_container_width=True)
+
     # ---- Top-Wörter anzeigen ----
     st.subheader("🏆 Top 20 häufigste Wörter insgesamt (ohne Stoppwörter)")
     most_common_df = pd.DataFrame(global_word_counter.most_common(20), columns=["Wort", "Anzahl"])
