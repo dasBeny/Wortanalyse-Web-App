@@ -12,7 +12,7 @@ import plotly.express as px
 # ----- Konfiguration -----
 st.set_page_config(layout="wide")
 st.title("📚 Wortanalyse in Textdateien")
-FOLDER_ID = "1-r8Qj_E_SoJEpLzpQTkIho2-GudLlIN7R"
+FOLDER_ID = "1-r8Qj_E_SoJEpLzpQTkIho2-GudLlIN7"
 
 # ----- Stoppliste laden -----
 STOPWORD_FILE = "stopwords.txt"
