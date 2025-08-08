@@ -48,14 +48,7 @@ cd wortanalyse-app
 pip install -r requirements.txt
 ```
 
-### Ordnerstruktur vorbereiten
 
-```bash
-mkdir texte
-mkdir stoppworte
-# Beispiel-Stoppwortliste erstellen
-echo -e "und\nder\ndie\nes" > stoppworte/stopwords.txt
-```
 
 ### App starten
 
@@ -72,7 +65,7 @@ Die App öffnet sich automatisch im Browser unter `http://localhost:8501`
 ```
 wortanalyse-app/
 ├── streamlit_app.py               # Hauptanwendung
-├── texte/                         # Eingabetexte (eine Datei pro Episode)
+├── texte/                         # Eingabetexte (eine Datei pro Episode/Buch in .txt Format)
 ├── stoppworte/stopwords.txt      # Benutzerdefinierte Stoppwortliste
 ├── requirements.txt              # Python-Abhängigkeiten
 └── README.md                     # Diese Datei
