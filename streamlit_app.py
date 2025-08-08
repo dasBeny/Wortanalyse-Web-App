@@ -12,7 +12,7 @@ import json
 import os
 import plotly.express as px
 
-# ----- Konfiguration -----
+# ----- Konfiguration ----
 st.set_page_config(layout="wide")
 st.title("📚 Wortanalyse in Textdateien")
 FOLDER_ID = "1-r8Qj_E_SoJEpLzpQTkIho2-GudLlIN7"
