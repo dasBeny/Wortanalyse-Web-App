@@ -24,34 +24,40 @@ except FileNotFoundError:
     st.warning("⚠️ Keine gültige Stoppliste gefunden. Es werden keine Stoppwörter gefiltert.")
 
 # ----- Google Drive Zugriff -----
+
 @st.cache_resource
 def load_files_from_drive():
     try:
-        # secrets -> temporäre JSON-Datei
-        with tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".json") as tmp:
-            json.dump(dict(st.secrets["google"]), tmp)
-            tmp_path = tmp.name
+        credentials = service_account.Credentials.from_service_account_info(
+            dict(st.secrets["google"]),
+            scopes=["https://www.googleapis.com/auth/drive.readonly"]
+        )
+        service = build("drive", "v3", credentials=credentials)
 
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = tmp_path
+        # Suche nach .txt-Dateien im Ordner
+        query = f"'{FOLDER_ID}' in parents and mimeType='text/plain' and trashed=false"
+        results = service.files().list(q=query, fields="files(id, name)").execute()
+        files = results.get("files", [])
 
-        gauth = GoogleAuth(settings_file=None)
-        gauth.ServiceAuth()
-        drive = GoogleDrive(gauth)
+        texts = {}
+        for file in files:
+            file_id = file["id"]
+            file_name = file["name"]
+            request = service.files().get_media(fileId=file_id)
+            fh = io.BytesIO()
+            downloader = MediaIoBaseDownload(fh, request)
+            done = False
+            while not done:
+                status, done = downloader.next_chunk()
+            fh.seek(0)
+            texts[file_name] = fh.read().decode("utf-8")
 
-        # Textdateien aus Ordner holen
-        query = f"'{FOLDER_ID}' in parents and trashed=false and mimeType='text/plain'"
-        file_list = drive.ListFile({'q': query}).GetList()
-
-        files = {}
-        for file in file_list:
-            content = file.GetContentString()
-            files[file['title']] = content
-
-        return files
+        return texts
 
     except Exception as e:
         st.error(f"❌ Fehler beim Laden von Dateien: {e}")
         return {}
+
 
 # ----- Text-Bereinigung -----
 def clean_text(text):
