@@ -6,6 +6,7 @@ from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 import tempfile
 import json
+import os
 import plotly.express as px
 
 # ----- Konfiguration -----
@@ -13,7 +14,7 @@ st.set_page_config(layout="wide")
 st.title("📚 Wortanalyse in Textdateien")
 FOLDER_ID = "1-r8Qj_E_SoJEpLzpQTkIho2-GudLlIN7R"
 
-# ----- Stoppliste -----
+# ----- Stoppliste laden -----
 STOPWORD_FILE = "stopwords.txt"
 try:
     with open(STOPWORD_FILE, encoding="utf-8") as f:
@@ -25,25 +26,32 @@ except FileNotFoundError:
 # ----- Google Drive Zugriff -----
 @st.cache_resource
 def load_files_from_drive():
-    # secrets -> temporäre JSON
-    with tempfile.NamedTemporaryFile(mode="w+", delete=False) as tmp:
-        json.dump(dict(st.secrets["google"]), tmp)
-        tmp.flush()
+    try:
+        # secrets -> temporäre JSON-Datei
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".json") as tmp:
+            json.dump(dict(st.secrets["google"]), tmp)
+            tmp_path = tmp.name
 
-        gauth = GoogleAuth()
-        gauth.LoadServiceConfigFile(tmp.name)
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = tmp_path
+
+        gauth = GoogleAuth(settings_file=None)
+        gauth.ServiceAuth()
         drive = GoogleDrive(gauth)
 
-    # Textdateien aus Ordner holen
-    query = f"'{FOLDER_ID}' in parents and trashed=false and mimeType='text/plain'"
-    file_list = drive.ListFile({'q': query}).GetList()
+        # Textdateien aus Ordner holen
+        query = f"'{FOLDER_ID}' in parents and trashed=false and mimeType='text/plain'"
+        file_list = drive.ListFile({'q': query}).GetList()
 
-    files = {}
-    for file in file_list:
-        content = file.GetContentString()
-        files[file['title']] = content
+        files = {}
+        for file in file_list:
+            content = file.GetContentString()
+            files[file['title']] = content
 
-    return files
+        return files
+
+    except Exception as e:
+        st.error(f"❌ Fehler beim Laden von Dateien: {e}")
+        return {}
 
 # ----- Text-Bereinigung -----
 def clean_text(text):
