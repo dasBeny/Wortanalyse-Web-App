@@ -120,6 +120,7 @@ if texts:
         value="cent, münze, eimer"
     )
 
+
     if phrase_input:
         phrases = [p.strip().lower() for p in phrase_input.split(",") if p.strip()]
         data = []
@@ -156,7 +157,24 @@ if texts:
         )
         st.dataframe(sum_table, use_container_width=True)
 
+        # 📈 Liniendiagramm: Gesamthäufigkeit pro Episode
+        df_sum_per_episode = (
+            df_phrases.groupby("Episode")["Anzahl"]
+            .sum()
+            .reset_index()
+            .rename(columns={"Anzahl": "Gesamthäufigkeit"})
+        )
 
+        fig_line = px.line(
+            df_sum_per_episode,
+            x="Episode",
+            y="Gesamthäufigkeit",
+            markers=True,
+            title="📈 Gesamthäufigkeit aller Begriffe pro Episode",
+            labels={"Gesamthäufigkeit": "Anzahl"}
+        )
+
+        st.plotly_chart(fig_line, use_container_width=True)
 
         top_episodes = episode_sums.head(10).index.tolist()
 
