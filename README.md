@@ -1,97 +1,109 @@
-# 📚 Wortanalyse Web-App mit Streamlit
+# 📚 Wortanalyse Web App
 
-Diese Webanwendung erlaubt die umfassende Analyse von Textdokumenten (z. B. Episoden, Bücher oder Kapitel) in Bezug auf:
+Diese Anwendung analysiert den Wortschatz einer umfangreichen Textsammlung (z. B. Romanreihen, Episodenliteratur, Fachtexte etc.) und visualisiert statistische Daten zu Wortverteilungen, Phrasenhäufigkeit und individuellen Entwicklungen über die Zeit.
 
-- Wortanzahl pro Datei
-- Entwicklung neuer Wörter über Dateien hinweg
-- Suche nach beliebigen Wörtern oder Wortgruppen
-- Visualisierung der Häufigkeit als interaktive Diagramme
-- Optional: Filterung von Stoppwörtern mittels externer Liste
+Die Anwendung nutzt **Google Drive** zur sicheren Einbindung urheberrechtlich geschützter Texte, ohne sie öffentlich zugänglich zu machen.
 
 ---
 
-## 🚀 Features
+## 🚀 Funktionen
 
-### 🔍 Interaktive Analyse
-
-- **Häufigkeitsanalyse** von Begriffen über mehrere Episoden hinweg
-- **Liniendiagramme** für Wortverläufe und Phrasen
-- **Top-20-Wörter** als Balkendiagramm (optional ohne Stoppwörter)
-
-### 📦 Eingabedaten
-
-- Textdateien im Ordner `texte/`
-- Jede Datei entspricht einer Episode (z. B. `001.txt`, `002.txt`, ...)
-- Optional: eigene Stoppwortliste in `stoppworte/stopwords.txt`
-
-### 📤 Ausgabe
-
-- CSV-Download der Wortstatistiken pro Episode
+- 📈 Visualisierung der Wortanzahl pro Episode
+- 🧠 Zählung einzigartiger und neuer Wörter über Zeit
+- 🔍 Phrasensuche (mehrere Begriffe gleichzeitig analysierbar)
+- 🏆 Anzeige der 20 häufigsten Wörter (ohne Stoppwörter)
+- 📥 Download der Statistik als CSV
 
 ---
 
-## 🛠️ Lokale Installation
+## 🔧 Installation
 
-### Voraussetzungen
-
-- Python 3.8+
-- Empfohlenes virtuelles Environment
-
-### Installation
+### 1. Repository klonen
 
 ```bash
-# Repository klonen
-git clone https://github.com/dasBeny/Wortanalyse-Web-App
-cd wortanalyse-app
+git clone https://github.com/dein-user/Wortanalyse-Web-App.git
+cd Wortanalyse-Web-App
+```
 
-# Abhängigkeiten installieren
+### 2. Abhängigkeiten installieren
+
+Erstelle am besten ein virtuelles Environment und installiere dann:
+
+```bash
 pip install -r requirements.txt
 ```
 
+### 3. `.streamlit/secrets.toml` einrichten
 
+Diese App verwendet einen **Google Service Account**, um auf deine privaten `.txt`-Dateien in einem bestimmten Google-Drive-Ordner zuzugreifen.
 
-### App starten
+Füge unter `.streamlit/secrets.toml` folgende Struktur ein:
 
-```bash
-streamlit run streamlit_app.py
+```toml
+[google]
+type = "service_account"
+project_id = "..."
+private_key_id = "..."
+private_key = """-----BEGIN PRIVATE KEY-----
+DEIN
+GEHEIMER
+KEY
+HIER
+-----END PRIVATE KEY-----"""
+client_email = "xyz@dein-projekt.iam.gserviceaccount.com"
+client_id = "..."
+auth_uri = "https://accounts.google.com/o/oauth2/auth"
+token_uri = "https://oauth2.googleapis.com/token"
+auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs"
+client_x509_cert_url = "..."
 ```
 
-Die App öffnet sich automatisch im Browser unter `http://localhost:8501`
+> 🎯 Den JSON-Service-Account-Schlüssel erhältst du über die [Google Cloud Console](https://console.cloud.google.com/). Vergiss nicht, den Ordner mit deinen `.txt`-Dateien für den Service-Account freizugeben!
 
 ---
 
-## 📁 Projektstruktur
+## 📁 Ordnerstruktur
 
-```
-wortanalyse-app/
-├── streamlit_app.py               # Hauptanwendung
-├── texte/                         # Eingabetexte (eine Datei pro Episode/Buch in .txt Format)
-├── stoppworte/stopwords.txt      # Benutzerdefinierte Stoppwortliste
-├── requirements.txt              # Python-Abhängigkeiten
-└── README.md                     # Diese Datei
-```
+- `streamlit_app.py` – Hauptlogik der App
+- `requirements.txt` – Python-Abhängigkeiten
+- `.streamlit/secrets.toml` – **nicht committen!** (geheim)
+- `stopwords.txt` – optionale Stoppwortliste
 
 ---
 
-## ✅ To-Do / Erweiterungsideen
+## ☁️ Deployment auf Streamlit Cloud
 
-- Filterbare Visualisierungen (z. B. nach Worttyp)
-- Wortstammerkennung / Lemmatisierung
-- Sprachumschaltung (Deutsch ↔ Englisch)
-- Option zur Auswahl einzelner Episoden
+Diese App funktioniert out-of-the-box auf [Streamlit Cloud](https://streamlit.io/cloud):
 
----
-
-## 📄 Lizenz
-
-MIT License – frei verwendbar mit Namensnennung.
+1. Repository mit GitHub verknüpfen
+2. In Streamlit Cloud auf „Add App“ klicken
+3. Bei „Secrets“ den Inhalt aus deiner `secrets.toml` einfügen
+4. Fertig ✅
 
 ---
 
-## ✨ Demo Screenshot
- - To-Do!
+## ⚠️ Hinweis zu Urheberrechten
 
+Diese App verarbeitet Texte, die urheberrechtlich geschützt sein können. Die Textdateien selbst werden **nicht veröffentlicht** oder zugänglich gemacht.  
+Der Zugriff erfolgt nur über **privaten Google Drive**, kontrolliert durch den App-Betreiber.
 
 ---
 
-Viel Spaß bei der Textanalyse! 📖
+## 🧪 Beispielhafte Einsatzszenarien
+
+- Analyse von Romanserien, z. B. Fantasy- oder Sci-Fi-Reihen
+- Sprachentwicklungen in Tagebüchern oder Briefsammlungen
+- Fachtextanalysen für Wissenschaft, Unterricht, Forschung
+
+---
+
+## 📜 Lizenz
+
+MIT License – siehe [LICENSE](LICENSE)
+
+---
+
+## ✨ Autor
+
+**Ben (a.k.a. dasBeny)**  
+[github.com/dasBeny](https://github.com/dasBeny)
