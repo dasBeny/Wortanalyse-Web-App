@@ -89,6 +89,8 @@ if texts:
         new_words = unique_words - new_words_set
         new_words_set.update(unique_words)
 
+
+
         book_stats.append({
             "Dateiname": file_name,
             "Wörter gesamt": word_count,
@@ -100,7 +102,15 @@ if texts:
 
     # ---- Statistiken anzeigen ----
     df_stats = pd.DataFrame(book_stats)
-    st.subheader("📈 Buchstatistiken")
+    st.subheader("📈 Büchstatistiken")
+
+    # ---- Allgemeine Statistik ----
+    st.header("📄 Allgemeine Statistik")
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric("🎧 Anzahl Episoden", len(texts))
+    col2.metric("🗣️ Gesprochene Wörter insgesamt", f"{sum(global_word_counter.values()):,}".replace(",", "."))
+    col3.metric("🔤 Verschiedene Wörter insgesamt", f"{len(global_word_counter):,}".replace(",", "."))
 
     fig_words = px.line(df_stats.reset_index(), x=df_stats.index + 1, y="Wörter gesamt", markers=True,
                         labels={"index": "Episode", "Wörter gesamt": "Wörter"},
@@ -111,6 +121,7 @@ if texts:
                          labels={"index": "Episode", "Einzigartige Wörter": "Einzigartige Wörter"},
                          title="🧠 Einzigartige Wörter pro Episode")
     st.plotly_chart(fig_unique, use_container_width=True)
+
 
     # ---- Phrasensuche ----
     st.subheader("🔍 Phrasensuche")
