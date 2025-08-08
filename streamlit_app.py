@@ -27,7 +27,7 @@ except FileNotFoundError:
 def load_files_from_drive():
     # secrets -> temporäre JSON
     with tempfile.NamedTemporaryFile(mode="w+", delete=False) as tmp:
-        json.dump(st.secrets["google"], tmp)
+        json.dump(dict(st.secrets["google"], tmp))
         tmp.flush()
 
         gauth = GoogleAuth()
