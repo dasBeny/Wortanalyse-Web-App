@@ -2,41 +2,67 @@ import streamlit as st
 import pandas as pd
 import re
 from collections import Counter
-from pathlib import Path
+from pydrive2.auth import GoogleAuth
+from pydrive2.drive import GoogleDrive
+import tempfile
+import json
 import plotly.express as px
 
+# ----- Konfiguration -----
 st.set_page_config(layout="wide")
 st.title("📚 Wortanalyse in Textdateien")
+FOLDER_ID = "1-r8Qj_E_SoJEpLzpQTkIho2-GudLlIN7R"
 
-# Pfade zu Text- und Stoppwortverzeichnis
-TEXT_DIR = Path("texte")  # Stelle sicher, dass ein Ordner namens 'texte' mit .txt-Dateien existiert
-STOPWORD_FILE = Path("stopwords.txt")
-text_files = list(TEXT_DIR.glob("*.txt"))
-
-# Stoppwörter aus Datei laden
-if STOPWORD_FILE.exists():
-    stopwords = set(word.strip().lower() for word in STOPWORD_FILE.read_text(encoding="utf-8").splitlines() if word.strip())
-else:
+# ----- Stoppliste -----
+STOPWORD_FILE = "stopwords.txt"
+try:
+    with open(STOPWORD_FILE, encoding="utf-8") as f:
+        stopwords = set(line.strip().lower() for line in f if line.strip())
+except FileNotFoundError:
     stopwords = set()
-    st.warning("⚠️ Keine gültige Stoppwortdatei unter 'stoppworte/stopwords.txt' gefunden. Es werden keine Stoppwörter gefiltert.")
+    st.warning("⚠️ Keine gültige Stoppliste gefunden. Es werden keine Stoppwörter gefiltert.")
 
-# Funktion zur Textbereinigung
+# ----- Google Drive Zugriff -----
+@st.cache_resource
+def load_files_from_drive():
+    # secrets -> temporäre JSON
+    with tempfile.NamedTemporaryFile(mode="w+", delete=False) as tmp:
+        json.dump(st.secrets["google"], tmp)
+        tmp.flush()
+
+        gauth = GoogleAuth()
+        gauth.LoadServiceConfigFile(tmp.name)
+        drive = GoogleDrive(gauth)
+
+    # Textdateien aus Ordner holen
+    query = f"'{FOLDER_ID}' in parents and trashed=false and mimeType='text/plain'"
+    file_list = drive.ListFile({'q': query}).GetList()
+
+    files = {}
+    for file in file_list:
+        content = file.GetContentString()
+        files[file['title']] = content
+
+    return files
+
+# ----- Text-Bereinigung -----
 def clean_text(text):
     text = text.lower()
-    text = re.sub(r"[\W_]+", " ", text)  # ersetzt Nicht-Wortzeichen durch Leerzeichen
+    text = re.sub(r"[\W_]+", " ", text)
     return text
 
-if text_files:
+# ----- Hauptverarbeitung -----
+texts = load_files_from_drive()
+
+if texts:
     book_stats = []
     global_word_counter = Counter()
     new_words_set = set()
-
     cleaned_texts = {}
 
-    for file in text_files:
-        text = file.read_text(encoding="utf-8")
-        cleaned = clean_text(text)
-        cleaned_texts[file.name] = cleaned
+    for idx, (file_name, raw_text) in enumerate(texts.items(), start=1):
+        cleaned = clean_text(raw_text)
+        cleaned_texts[file_name] = cleaned
 
         words = cleaned.split()
         filtered_words = [w for w in words if w not in stopwords]
@@ -46,7 +72,7 @@ if text_files:
         new_words_set.update(unique_words)
 
         book_stats.append({
-            "Dateiname": file.name,
+            "Dateiname": file_name,
             "Wörter gesamt": word_count,
             "Einzigartige Wörter": len(unique_words),
             "Neue Wörter (kumulativ)": len(new_words)
@@ -54,9 +80,10 @@ if text_files:
 
         global_word_counter.update(filtered_words)
 
-    # Zeige Statistik je Buch
+    # ---- Statistiken anzeigen ----
     df_stats = pd.DataFrame(book_stats)
     st.subheader("📈 Buchstatistiken")
+
     fig_words = px.line(df_stats.reset_index(), x=df_stats.index + 1, y="Wörter gesamt", markers=True,
                         labels={"index": "Episode", "Wörter gesamt": "Wörter"},
                         title="📊 Wörter pro Episode")
@@ -67,7 +94,7 @@ if text_files:
                          title="🧠 Einzigartige Wörter pro Episode")
     st.plotly_chart(fig_unique, use_container_width=True)
 
-    # Mehrwortsuche (kombinierte Phrasen)
+    # ---- Phrasensuche ----
     st.subheader("🔍 Phrasensuche")
     phrase_input = st.text_area("Gib eine oder mehrere Wortgruppen (durch Kommas getrennt) ein, z. B.: feuer, schwarzer rauch")
 
@@ -77,7 +104,7 @@ if text_files:
 
         for i, (file_name, cleaned) in enumerate(cleaned_texts.items(), start=1):
             for phrase in phrases:
-                count = cleaned.count(" "+phrase+" ")
+                count = cleaned.count(" " + phrase + " ")
                 data.append({"Episode": i, "Dateiname": file_name, "Phrase": phrase, "Anzahl": count})
 
         df_phrases = pd.DataFrame(data)
@@ -86,14 +113,14 @@ if text_files:
                               labels={"Anzahl": "Anzahl", "Episode": "Episode"})
         st.plotly_chart(fig_phrases, use_container_width=True)
 
-    # Top 20 Wörter insgesamt
+    # ---- Top-Wörter anzeigen ----
     st.subheader("🏆 Top 20 häufigste Wörter insgesamt (ohne Stoppwörter)")
     most_common_df = pd.DataFrame(global_word_counter.most_common(20), columns=["Wort", "Anzahl"])
     fig_common = px.bar(most_common_df, x="Wort", y="Anzahl", title="🏅 Häufigste Wörter", text="Anzahl")
     st.plotly_chart(fig_common, use_container_width=True)
 
-    # Optional: Download als CSV
+    # ---- Download ----
     csv = df_stats.to_csv(index=False).encode('utf-8')
     st.download_button("📥 Lade Statistiken als CSV herunter", csv, "buchstatistiken.csv", "text/csv")
 else:
-    st.warning("❗ Keine Textdateien im Ordner 'texte' gefunden.")
+    st.warning("❗ Keine Textdateien gefunden oder Ordner-ID ist ungültig.")
