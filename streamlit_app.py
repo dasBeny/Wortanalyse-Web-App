@@ -108,8 +108,8 @@ if texts:
     st.header("📄 Allgemeine Statistik")
 
     col1, col2, col3 = st.columns(3)
-    col1.metric("🎧 Anzahl Episoden", len(texts))
-    col2.metric("🗣️ Gesprochene Wörter insgesamt", f"{sum(global_word_counter.values()):,}".replace(",", "."))
+    col1.metric("🎧 Anzahl der Bücher", len(texts))
+    col2.metric("️🔤 Wörter insgesamt", f"{sum(global_word_counter.values()):,}".replace(",", "."))
     col3.metric("🔤 Verschiedene Wörter insgesamt", f"{len(global_word_counter):,}".replace(",", "."))
 
     fig_words = px.line(df_stats.reset_index(), x=df_stats.index + 1, y="Wörter gesamt", markers=True,
