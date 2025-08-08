@@ -1,9 +1,11 @@
-streamlit
-pandas
-plotly
-pydrive2
+streamlit~=1.48.0
+pandas~=2.3.1
+plotly~=6.2.0
+pydrive2~=1.21.3
 google-api-python-client
 google-auth
 google-auth-httplib2
 google-auth-oauthlib
 
+
+protobuf~=6.31.1
